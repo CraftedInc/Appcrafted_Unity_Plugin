@@ -10,6 +10,7 @@ public class CraftedAd
 	public Texture2D image = new Texture2D(4, 4, TextureFormat.PVRTC_RGBA2, false);
 	public string link;
 	
+	/*
 	public CraftedAd (string newTitle, string newText, string newImageLink, Texture2D newImage, string newLink)
 	{
 		title = newTitle;
@@ -18,5 +19,6 @@ public class CraftedAd
 		image = newImage;
 		link = newLink;
 	}
+	*/
 		
 }

@@ -1,3 +1,5 @@
+/*
+
 using UnityEngine;
 using UnityEditor;
 
@@ -19,3 +21,5 @@ public class AdCraftedPanel : EditorWindow {
 	}
 	
 }
+
+*/
