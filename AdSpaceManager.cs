@@ -7,9 +7,6 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 {
 	
 	public List<AdSpace> adSpaces = new List<AdSpace>();
-	private string apiUrlPart1 = "http://api.adcrafted.com/adspace/";
-	private string apiUrlPart2 = "/ad";	
-	
 	
 	#region Create Singleton //http://answers.unity3d.com/questions/17916/singletons-with-coroutines.html
 	//[begin]creating a singleton that doesn't need to be attached to a gameobject
@@ -44,14 +41,30 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 	
 	public void registerAdSpaces(params string[] adSpaceIDs)
 	{
+		
 		int numberOfAdSpaces = adSpaceIDs.Length;
 		
 		for (int i = 0; i < numberOfAdSpaces; i++)
 		{
-			AdSpace newAdSpace = new AdSpace(adSpaceIDs[i]);
-			adSpaces.Add(newAdSpace);
-			string url = apiUrlPart1 + newAdSpace.adSpaceID + apiUrlPart2;
-			StartCoroutine(LoadJSON(url, newAdSpace));	
+			//check if any adSpaceID already exists in adSpaces list
+			bool adSpaceAlreadyRegistered = adSpaces.Exists ( delegate (AdSpace obj) {return obj.adSpaceID == adSpaceIDs[i];} );
+			if (adSpaceAlreadyRegistered)
+			{
+				Debug.Log("Ad Space Already Registered");
+				//find the repeated adspace from the List
+				AdSpace adSpaceToReregister = adSpaces.Find ( delegate (AdSpace obj) {return obj.adSpaceID == adSpaceIDs[i];} );
+				StartCoroutine(LoadJSON(adSpaceToReregister));	
+				Debug.Log ("Registering AdSpace: "+ adSpaceToReregister.adSpaceID);
+			
+			}
+			else 
+			{
+				//adding new adspaces
+				AdSpace newAdSpace = new AdSpace(adSpaceIDs[i]);
+				adSpaces.Add(newAdSpace);
+				StartCoroutine(LoadJSON(newAdSpace));	
+				Debug.Log ("Registering AdSpace: "+ newAdSpace.adSpaceID);
+			}
 		}
 		
 	}
@@ -101,8 +114,13 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 		
 	}
 	
-	IEnumerator LoadJSON (string JSONurl, AdSpace thisAdSpace) 
-	{				
+	IEnumerator LoadJSON (AdSpace thisAdSpace) 
+	{		
+		
+		string apiUrlPart1 = "http://api.adcrafted.com/adspace/";
+		string apiUrlPart2 = "/ad";	
+		string JSONurl = apiUrlPart1 + thisAdSpace.adSpaceID + apiUrlPart2;
+		
 		WWW www = new WWW(JSONurl);	// Start a download of the given URL
 		yield return www;			// wait until the download is done
 		JSONObject thisJSONObject = JSONObject.Parse(www.text); //define the JSON Object
@@ -128,8 +146,11 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 			thisAdSpace.craftedAds[i].title = thisAd.GetString ("title");
 			thisAdSpace.craftedAds[i].text = thisAd.GetString ("text");
 			thisAdSpace.craftedAds[i].link = thisAd.GetString ("link");
+			
+			Debug.Log ("JSON loaded: "+thisAdSpace.craftedAds[i].title);
 		}
 		
 	}
+	
 }
 
