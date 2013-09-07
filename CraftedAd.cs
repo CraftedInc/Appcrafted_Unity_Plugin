@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CraftedAd 
+public class CraftedAd
 {
 	public string title;
 	public string text;
@@ -27,4 +27,5 @@ public class CraftedAd
 		image = null;
 		link = "init value";
 	}
+	
 }

@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic; //for List<> http://msdn.microsoft.com/en-us/library/6sh2ey19.aspx
+using System;
+using System.Reflection; //for GetFields()
 using Boomlagoon.JSON;
 
 public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use Coroutine for WWW class
@@ -51,17 +53,21 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 			if (adSpaceAlreadyRegistered)
 			{
 				Debug.Log("Ad Space Already Registered");
+								
 				//find the repeated adspace from the List
 				AdSpace adSpaceToReregister = adSpaces.Find ( delegate (AdSpace obj) {return obj.adSpaceID == adSpaceIDs[i];} );
+				//unload unused assets from memory
+				unloadAdSpaceFromMemory(adSpaceToReregister);
+				//load new ad from JSON on the server								
 				StartCoroutine(LoadJSON(adSpaceToReregister));	
 				Debug.Log ("Registering AdSpace: "+ adSpaceToReregister.adSpaceID);
 			
 			}
-			else 
+			else //register a new adspace
 			{
-				//adding new adspaces
 				AdSpace newAdSpace = new AdSpace(adSpaceIDs[i]);
 				adSpaces.Add(newAdSpace);
+				//load new ad from JSON on the server								
 				StartCoroutine(LoadJSON(newAdSpace));	
 				Debug.Log ("Registering AdSpace: "+ newAdSpace.adSpaceID);
 			}
@@ -147,9 +153,18 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 			thisAdSpace.craftedAds[i].text = thisAd.GetString ("text");
 			thisAdSpace.craftedAds[i].link = thisAd.GetString ("link");
 			
-			Debug.Log ("JSON loaded: "+thisAdSpace.craftedAds[i].title);
+			//Debug.Log ("JSON loaded: "+thisAdSpace.craftedAds[i].title);
 		}
 		
+	}
+	
+	private void unloadAdSpaceFromMemory(AdSpace thisAdSpace) //ToDo: need to re-evaluate, not generic enough 
+	{
+		for (int i = 0; i < thisAdSpace.craftedAds.Length; i++)
+		{
+			Destroy(thisAdSpace.craftedAds[i].image);	//removes the image texture from memory
+		}
+				
 	}
 	
 }
