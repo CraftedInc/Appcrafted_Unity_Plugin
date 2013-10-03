@@ -165,16 +165,13 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 	
 	IEnumerator PostData(string adSpaceID, int adID, int impressions, int clicks){
 		string ourPostData = "{\"impressions\": " + impressions.ToString() + ", \"clicks\": " + clicks.ToString() +"}";
-		Debug.Log("post data string: "+ourPostData);
 		
 		Hashtable headers = new Hashtable();
 		headers.Add("Content-Type", "application/json");
 		
 		byte[] body = Encoding.UTF8.GetBytes(ourPostData);
 		
-		
 		WWW www = new WWW("http://api.adcrafted.com/adspace/"+adSpaceID+"/ad/"+adID.ToString()+"/metrics", body, headers);
-		Debug.Log("post data URL: "+"http://api.adcrafted.com/adspace/"+adSpaceID+"/ad/"+adID.ToString()+"/metrics");
 		
 		yield return www;
 		JSONObject thisJSONObject = JSONObject.Parse(www.text); 
