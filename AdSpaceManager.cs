@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic; //for List<> http://msdn.microsoft.com/en-us/library/6sh2ey19.aspx
 using Boomlagoon.JSON;
+using System;
+using System.Text;
 
 public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use Coroutine for WWW class
 {
@@ -96,7 +98,7 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 		
 	}
 	
-	public CraftedAd loadAd(string adSpaceID, int adNumber)
+	public CraftedAd loadAd(string adSpaceID, int adID)
 	{
 		//find the specified adspace from the List
 		AdSpace adSpaceToLoad = adSpaces.Find (	
@@ -105,19 +107,9 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 			}
 		);
 		
-		return adSpaceToLoad.craftedAds[adNumber];
+		return adSpaceToLoad.craftedAds[adID];
 	}
-	
-	public void registerImpression(string adSpaceID, int adNumber)
-	{
-		
-	}
-	
-	public void registerClick(string adSpaceID, int adNumber)
-	{
-		
-	}
-	
+
 	IEnumerator LoadJSON (AdSpace thisAdSpace) 
 	{		
 		
@@ -165,5 +157,29 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 				
 	}
 	
+	//Register impressions and clicks of an ad	
+	public void registerImpressionsAndClicks(string adSpaceID, int adID, int impressions, int clicks)
+	{
+		StartCoroutine (PostData(adSpaceID,adID,impressions,clicks));
+	}
+	
+	IEnumerator PostData(string adSpaceID, int adID, int impressions, int clicks){
+		string ourPostData = "{\"impressions\": " + impressions.ToString() + ", \"clicks\": " + clicks.ToString() +"}";
+		Debug.Log("post data string: "+ourPostData);
+		
+		Hashtable headers = new Hashtable();
+		headers.Add("Content-Type", "application/json");
+		
+		byte[] body = Encoding.UTF8.GetBytes(ourPostData);
+		
+		
+		WWW www = new WWW("http://api.adcrafted.com/adspace/"+adSpaceID+"/ad/"+adID.ToString()+"/metrics", body, headers);
+		Debug.Log("post data URL: "+"http://api.adcrafted.com/adspace/"+adSpaceID+"/ad/"+adID.ToString()+"/metrics");
+		
+		yield return www;
+		JSONObject thisJSONObject = JSONObject.Parse(www.text); 
+		Debug.Log ("POST result: "+ thisJSONObject);
+		
+	}
 }
 
