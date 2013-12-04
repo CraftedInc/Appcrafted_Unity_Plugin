@@ -9,6 +9,8 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 {
 	
 	public List<AdSpace> adSpaces = new List<AdSpace>();
+	private string accessKey;
+	private string secretKey;
 	
 	#region Create Singleton //http://answers.unity3d.com/questions/17916/singletons-with-coroutines.html
 	//[begin]creating a singleton that doesn't need to be attached to a gameobject
@@ -40,10 +42,19 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
     }
 	//[end]creating a singleton that doesn't need to be attached to a gameobject//
 	#endregion
-	
+
+	public void registerCredentials(string accessKey, string secretKey) {
+		this.accessKey = accessKey;
+		this.secretKey = secretKey;
+	}
+
 	public void registerAdSpaces(params string[] adSpaceIDs)
 	{
-		
+		//validate credentials
+		if (this.accessKey == null || this.secretKey == null) {
+			throw new System.MemberAccessException("missing credentials");
+		}
+
 		int numberOfAdSpaces = adSpaceIDs.Length;
 		
 		for (int i = 0; i < numberOfAdSpaces; i++)
@@ -72,10 +83,9 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 				Debug.Log ("Registering AdSpace: "+ newAdSpace.adSpaceID);
 			}
 		}
-		
 	}
 	
-	public CraftedAd loadAd(string adSpaceID)
+	public CraftedAd[] getAllAds(string adSpaceID)
 	{
 		//find the specified adspace from the List
 		AdSpace adSpaceToLoad = adSpaces.Find (	
@@ -83,22 +93,11 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 				return obj.adSpaceID == adSpaceID;
 			}
 		);
-		
 
-		if (adSpaceToLoad.indexOfAdToShow >= adSpaceToLoad.craftedAds.Length)
-		{
-			adSpaceToLoad.indexOfAdToShow = 1;
-			return adSpaceToLoad.craftedAds[0];
-		}
-		else
-		{	
-			adSpaceToLoad.indexOfAdToShow += 1;
-			return adSpaceToLoad.craftedAds[adSpaceToLoad.indexOfAdToShow-1];
-		}
-		
+		return adSpaceToLoad.craftedAds;
 	}
 	
-	public CraftedAd loadAd(string adSpaceID, int adID)
+	public CraftedAd getAd(string adSpaceID, int adID)
 	{
 		//find the specified adspace from the List
 		AdSpace adSpaceToLoad = adSpaces.Find (	
@@ -110,14 +109,18 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 		return adSpaceToLoad.craftedAds[adID];
 	}
 
-	IEnumerator LoadJSON (AdSpace thisAdSpace) 
-	{		
-		
+	IEnumerator LoadJSON (AdSpace thisAdSpace) {
+
+		Hashtable headers = new Hashtable();
+		headers["Authorization"] = "Basic " +
+									System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+									this.accessKey + ":" + this.secretKey));
+
 		string apiUrlPart1 = "http://api.adcrafted.com/adspace/";
 		string apiUrlPart2 = "/ad";	
 		string JSONurl = apiUrlPart1 + thisAdSpace.adSpaceID + apiUrlPart2;
-		
-		WWW www = new WWW(JSONurl);	// Start a download of the given URL
+
+		WWW www = new WWW(JSONurl, null, headers);	// Start a download of the given URL
 		yield return www;			// wait until the download is done
 		JSONObject thisJSONObject = JSONObject.Parse(www.text); //define the JSON Object
 				
@@ -160,14 +163,23 @@ public class AdSpaceManager : MonoBehaviour //need to be a MonoBehaviour to use 
 	//Register impressions and clicks of an ad	
 	public void registerImpressionsAndClicks(string adSpaceID, int adID, int impressions, int clicks)
 	{
+		//validate credentials
+		if (this.accessKey == null || this.secretKey == null) {
+			throw new System.MemberAccessException("missing credentials");
+		}
+
 		StartCoroutine (PostData(adSpaceID,adID,impressions,clicks));
 	}
 	
 	IEnumerator PostData(string adSpaceID, int adID, int impressions, int clicks){
+
 		string ourPostData = "{\"impressions\": " + impressions.ToString() + ", \"clicks\": " + clicks.ToString() +"}";
 		
 		Hashtable headers = new Hashtable();
 		headers.Add("Content-Type", "application/json");
+		headers["Authorization"] = "Basic " +
+			System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+			this.accessKey + ":" + this.secretKey));
 		
 		byte[] body = Encoding.UTF8.GetBytes(ourPostData);
 		

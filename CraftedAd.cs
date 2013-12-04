@@ -21,11 +21,11 @@ public class CraftedAd
 	
 	public CraftedAd ()
 	{
-		title = "init value";
-		text = "init value";
-		imageLink = "init value";
+		title = "init title value";
+		text = "init text value";
+		imageLink = "init imagelink value";
 		image = null;
-		link = "init value";
+		link = "init link value";
 	}
 	
 }
