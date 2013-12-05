@@ -10,6 +10,9 @@ public class AdSpaceManager : MonoBehaviour { //need to be a MonoBehaviour to us
 	public List<AdSpace> adSpaces = new List<AdSpace>();
 	private string accessKey;
 	private string secretKey;
+
+	public delegate	void AssetAction(string adSpaceID);
+	public static event AssetAction OnAssetDownloaded;
 	
 	#region Create Singleton
 	//[begin]creating a singleton that doesn't need to be attached to a gameobject
@@ -47,6 +50,10 @@ public class AdSpaceManager : MonoBehaviour { //need to be a MonoBehaviour to us
 		this.secretKey = secretKey;
 	}
 
+	public void registerAdSpacesFromApp(params string[] adSpaceIDs){
+		StartCoroutine(registerAdSpaces(adSpaceIDs));
+	}
+
 	public IEnumerator registerAdSpaces(params string[] adSpaceIDs) {
 
 		//validate credentials
@@ -63,12 +70,22 @@ public class AdSpaceManager : MonoBehaviour { //need to be a MonoBehaviour to us
 				unloadAdSpaceFromMemory(adSpaceToReregister); //unload unused assets from memory
 				yield return StartCoroutine(GETAdSpace(adSpaceToReregister));	//load new ads from on the server	
 				Debug.Log ("AdSpace: "+ adSpaceToReregister.adSpaceID + " has been re-registered.");
+
+				//trigger event OnAssetDownloaded
+				if (OnAssetDownloaded != null) {
+					OnAssetDownloaded(adSpaceToReregister.adSpaceID);
+				}
 			
 			} else {	//register a new adspace
 				AdSpace newAdSpace = new AdSpace(adSpaceIDs[i]);
 				adSpaces.Add(newAdSpace);
 				yield return StartCoroutine(GETAdSpace(newAdSpace));	//load new ads from on the server		
 				Debug.Log ("AdSpace: "+ newAdSpace.adSpaceID + " has been registered.");
+
+				//trigger event OnAssetDownloaded
+				if (OnAssetDownloaded != null) {
+					OnAssetDownloaded(newAdSpace.adSpaceID);
+				}
 			}
 		}
 	}
