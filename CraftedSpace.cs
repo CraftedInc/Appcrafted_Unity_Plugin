@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using Boomlagoon.JSON;
 
-namespace AppCrafted
+namespace CraftedInc.AppCrafted
 {
 	class CraftedSpace {
 		public CraftedAsset[] craftedAssets;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace AppCrafted
+namespace CraftedInc.AppCrafted
 {
 	class CraftedAsset {
 		public string title;

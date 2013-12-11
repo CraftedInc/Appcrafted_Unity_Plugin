@@ -1,13 +1,13 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic; //for List<> http://msdn.microsoft.com/en-us/library/6sh2ey19.aspx
+using System.Collections.Generic; //for List<>
 using Boomlagoon.JSON;
 using System;
 using System.Text;
 
-namespace AppCrafted
+namespace CraftedInc.AppCrafted
 {
-	class CraftedSpaceManager : MonoBehaviour { //need to be a MonoBehaviour to use Coroutine for WWW class
+	class CraftedSpaceManager : MonoBehaviour { //MonoBehaviour for coroutine
 		
 		public List<CraftedSpace> craftedSpaces = new List<CraftedSpace>();
 		private string accessKey;
@@ -15,9 +15,9 @@ namespace AppCrafted
 		
 		public delegate	void AssetAction(string craftedSpaceID);
 		public static event AssetAction OnAssetDownloaded;
-		
+
+		//Create a singleton that doesn't need to be attached to a gameobject
 		#region Create Singleton
-		//[begin]creating a singleton that doesn't need to be attached to a gameobject
 		private static CraftedSpaceManager instance = null;
 		public CraftedSpaceManager()
 		{
@@ -34,29 +34,31 @@ namespace AppCrafted
 			{
 				if (instance == null)
 				{
-					// component-based - we have to use a component-based approach since we cannot use coroutine if this is not a monobehavior
-					Debug.Log ("instantiate");
+					// component-based approach to use coroutine
+					Debug.Log ("instantiate a CraftedSpaceManager");
 					GameObject go = new GameObject();
 					instance = go.AddComponent<CraftedSpaceManager>();
-					go.name = "CraftedController";
+					go.name = "AppCraftedController";
 					
 				}
 				return instance;
 			}
 		}
-		//[end]creating a singleton that doesn't need to be attached to a gameobject//
 		#endregion
-		
-		public void registerCredentials(string accessKey, string secretKey) {
+
+		//a public method to register credentials
+		public void RegisterCredentials(string accessKey, string secretKey) {
 			this.accessKey = accessKey;
 			this.secretKey = secretKey;
 		}
-		
-		public void registerCraftedSpacesFromApp(params string[] craftedSpaceIDs){
-			StartCoroutine(registerCraftedSpaces(craftedSpaceIDs));
+
+		//a public method that should be used to register CraftedSpaces
+		public void RegisterCraftedSpaces(params string[] craftedSpaceIDs){
+			StartCoroutine(RegisterCraftedSpacesIEnumerator(craftedSpaceIDs));
 		}
-		
-		public IEnumerator registerCraftedSpaces(params string[] craftedSpaceIDs) {
+
+		//a coroutine that retrives all assets and place in a CraftedSpace array 
+		private IEnumerator RegisterCraftedSpacesIEnumerator(params string[] craftedSpaceIDs) {
 			
 			//validate credentials
 			if (this.accessKey == null || this.secretKey == null) {
@@ -69,8 +71,8 @@ namespace AppCrafted
 				if (craftedSpaceAlreadyRegistered) {	//re-register a previously registered adspace
 					Debug.Log("CraftedSpace: "+ craftedSpaceIDs[i] + " has been registered before. Re-registering.");
 					CraftedSpace craftedSpaceToReregister = craftedSpaces.Find ( delegate (CraftedSpace obj) {return obj.craftedSpaceID == craftedSpaceIDs[i];} ); //find the repeated adspace from the List
-					unloadCraftedSpaceFromMemory(craftedSpaceToReregister); //unload unused assets from memory
-					yield return StartCoroutine(GETCraftedSpace(craftedSpaceToReregister));	//load new ads from on the server	
+					UnloadCraftedSpaceFromMemory(craftedSpaceToReregister); //unload unused assets from memory
+					yield return StartCoroutine(GetCraftedSpace(craftedSpaceToReregister));	//load new ads from on the server	
 					Debug.Log ("CraftedSpace: "+ craftedSpaceToReregister.craftedSpaceID + " has been re-registered.");
 					
 					//trigger event OnAssetDownloaded
@@ -81,7 +83,7 @@ namespace AppCrafted
 				} else {	//register a new craftedSpace
 					CraftedSpace newCraftedSpace = new CraftedSpace(craftedSpaceIDs[i]);
 					craftedSpaces.Add(newCraftedSpace);
-					yield return StartCoroutine(GETCraftedSpace(newCraftedSpace));	//load new ads from on the server		
+					yield return StartCoroutine(GetCraftedSpace(newCraftedSpace));	//load new ads from on the server		
 					Debug.Log ("CraftedSpace: "+ newCraftedSpace.craftedSpaceID + " has been registered.");
 					
 					//trigger event OnAssetDownloaded
@@ -92,14 +94,14 @@ namespace AppCrafted
 			}
 		}
 		
-		
-		public CraftedAsset[] getAllAssets(string craftedSpaceID) {
+		//get the asset array from a specific CraftedSpace
+		public CraftedAsset[] GetAllAssets(string craftedSpaceID) {
 			
 			//check if any craftedSpaceID already exists in adSpaces list (if already registered)
 			bool craftedSpaceAlreadyRegistered = craftedSpaces.Exists ( delegate (CraftedSpace obj) {return obj.craftedSpaceID == craftedSpaceID;} );
 			if (!craftedSpaceAlreadyRegistered) {
-				Debug.LogError("You Should Register the CraftedSpace First Before using getAllAds(string craftedSpaceID)");
-				StartCoroutine(registerCraftedSpaces(craftedSpaceID));
+				Debug.LogError("You Should Register the CraftedSpace First Before using getAllAssets(string craftedSpaceID)");
+				StartCoroutine(RegisterCraftedSpacesIEnumerator(craftedSpaceID));
 				//find the specified adspace from the List
 				return craftedSpaces.Find ( delegate (CraftedSpace obj) { return obj.craftedSpaceID == craftedSpaceID; } ).craftedAssets;
 			}
@@ -109,8 +111,8 @@ namespace AppCrafted
 			return craftedSpaceToLoad.craftedAssets;
 		}
 		
-		
-		public CraftedAsset[] getAllAssets() {
+		//get the asset array from the first CraftedSpace
+		public CraftedAsset[] GetAllAssets() {
 			if (this.craftedSpaces[0] != null) {
 				//return the 1st adspace from the List
 				return this.craftedSpaces[0].craftedAssets;
@@ -119,9 +121,10 @@ namespace AppCrafted
 				return null;
 			}
 		}
-		
-		public CraftedAsset getAsset(string craftedSpaceID, int assetID) {
-			//find the specified adspace from the List
+
+		//Get a specific asset by CraftedSpace ID and Asset ID
+		public CraftedAsset GetAsset(string craftedSpaceID, int assetID) {
+			//find the specified craftedspace from the List
 			CraftedSpace craftedSpaceToLoad = craftedSpaces.Find (	
 			                                                      delegate(CraftedSpace obj) {
 				return obj.craftedSpaceID == craftedSpaceID;
@@ -130,8 +133,9 @@ namespace AppCrafted
 			
 			return craftedSpaceToLoad.craftedAssets[assetID];
 		}
-		
-		IEnumerator GETCraftedSpace (CraftedSpace craftedSpace) {
+
+		// GET the JSON file from server and retrive assets from server
+		IEnumerator GetCraftedSpace (CraftedSpace craftedSpace) {
 			
 			//header for authentication
 			Hashtable headers = new Hashtable();
@@ -172,8 +176,9 @@ namespace AppCrafted
 			}
 			
 		}
-		
-		private void unloadCraftedSpaceFromMemory(CraftedSpace craftedSpace) { //ToDo: need to re-evaluate, not generic enough 
+
+		//unload previously loaded assets (particularly images) from memory
+		private void UnloadCraftedSpaceFromMemory(CraftedSpace craftedSpace) { //ToDo: need to re-evaluate, not generic enough 
 			for (int i = 0; i < craftedSpace.craftedAssets.Length; i++) {
 				Destroy(craftedSpace.craftedAssets[i].image);	//removes the image texture from memory
 			}
@@ -181,7 +186,7 @@ namespace AppCrafted
 		}
 		
 		//Register impressions and clicks of an asset	
-		public void registerImpressionsAndClicks(string craftedSpaceID, int assetID, int impressions, int clicks) {
+		public void RegisterImpressionsAndClicks(string craftedSpaceID, int assetID, int impressions, int clicks) {
 			//validate credentials
 			if (this.accessKey == null || this.secretKey == null) {
 				throw new System.MemberAccessException("missing credentials");
@@ -189,7 +194,8 @@ namespace AppCrafted
 			
 			StartCoroutine (PostData(craftedSpaceID,assetID,impressions,clicks));
 		}
-		
+
+		//Post data via a JSON file back to server
 		IEnumerator PostData(string craftedSpaceID, int assetID, int impressions, int clicks) {
 			
 			string ourPostData = "{\"impressions\": " + impressions.ToString() + ", \"clicks\": " + clicks.ToString() +"}";
