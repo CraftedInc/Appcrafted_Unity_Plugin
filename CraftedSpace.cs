@@ -11,6 +11,7 @@ namespace CraftedInc.AppCrafted
 		public CraftedSpace(string craftedSpaceID)
 		{
 			this.craftedSpaceID = craftedSpaceID;
+			//this.craftedAssets = new CraftedAsset[2];
 		}
 		public CraftedSpace() { }
 	}

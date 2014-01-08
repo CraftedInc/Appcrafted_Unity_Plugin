@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace CraftedInc.AppCrafted
 {
@@ -18,7 +19,7 @@ namespace CraftedInc.AppCrafted
 			this.image = image;
 			this.link = link;
 		}
-		
+
 		public CraftedAsset () { }
 	}	
 }
