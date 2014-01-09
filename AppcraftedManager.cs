@@ -5,7 +5,7 @@ using Boomlagoon.JSON;
 using System;
 using System.Text;
 
-namespace CraftedInc.AppCrafted
+namespace CraftedInc.Appcrafted
 {
 	class Container {
 		public Dictionary<string, Asset> assets 
@@ -15,19 +15,18 @@ namespace CraftedInc.AppCrafted
 		public Dictionary<string, object> attributes 
 			= new Dictionary<string, object>();
 	}
-	class CraftedSpaceManager : MonoBehaviour { //MonoBehaviour required for coroutine
+	class AppcraftedManager : MonoBehaviour { //MonoBehaviour required for coroutine
 		private string endpoint = "http://api.appcrafted.com/v0/assets/";
 		private string accessKey;
 		private string secretKey;
 		private Dictionary<string, Container> containers = new Dictionary<string, Container>();
-//		private List<Texture2D> loadedImages = new List<Texture2D>();
 		public delegate	void AssetDelegate(Asset asset);
 		public static event AssetDelegate OnLoaded;
 
 		//Create a singleton that doesn't need to be attached to a gameobject
 		#region Create Singleton
-		private static CraftedSpaceManager instance = null;
-		public CraftedSpaceManager()
+		private static AppcraftedManager instance = null;
+		public AppcraftedManager()
 		{
 			if (instance !=null)
 			{
@@ -36,17 +35,17 @@ namespace CraftedInc.AppCrafted
 			}
 			instance = this;
 		}
-		public static CraftedSpaceManager Instance
+		public static AppcraftedManager Instance
 		{
 			get
 			{
 				if (instance == null)
 				{
 					// component-based approach to use coroutine
-					Debug.Log ("instantiate a CraftedSpaceManager");
+					Debug.Log ("instantiate a AppcraftedManager");
 					GameObject go = new GameObject();
-					instance = go.AddComponent<CraftedSpaceManager>();
-					go.name = "AppCraftedController";
+					instance = go.AddComponent<AppcraftedManager>();
+					go.name = "AppcraftedManager";
 					
 				}
 				return instance;
@@ -120,9 +119,6 @@ namespace CraftedInc.AppCrafted
 						string attributeName = keyValuePair.Key;
 
 						JSONObject attributeJSON = JSONObject.Parse(keyValuePair.Value.ToString());
-//						Debug.Log ("attributeJSON: " + attributeJSON);
-//						Debug.Log ("attributeJSON Type: " + attributeJSON.GetString("Type"));
-//						Debug.Log ("attributeJSON Value: " + attributeJSON.GetString("Value"));
 
 						//process attributes based on Type
 						string type = attributeJSON.GetString("Type");
@@ -142,10 +138,8 @@ namespace CraftedInc.AppCrafted
 							string imageURL = attributeJSON.GetString ("Value");
 							WWW imageObject = new WWW(imageURL); 
 							yield return imageObject;
-//							Texture2D image = imageObject.texture as Texture2D;
 							Texture2D image = new Texture2D(imageObject.texture.width, imageObject.texture.height);
 							imageObject.LoadImageIntoTexture(image);
-//							loadedImages.Add(image); // adding the image to loadedImages so we can unload them later if necessary
 							this.containers[containerID].assets[currentAssetID]
 							.attributes.Add(attributeName, image);
 							Debug.Log (attributeName + " : " 
@@ -201,13 +195,6 @@ namespace CraftedInc.AppCrafted
 
 		}
 
-		//unload previously loaded images from memory
-//		private void UnloadImages() { 
-//			for (int i = 0; i < loadedImages.Count; i++) {
-//				Destroy(loadedImages[i]);	//removes the image texture from memory
-//			}
-//			loadedImages.Clear();
-//		}
 	}
 
 }
