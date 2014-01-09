@@ -15,12 +15,10 @@ namespace CraftedInc.AppCrafted
 		public Dictionary<string, object> attributes 
 			= new Dictionary<string, object>();
 	}
-
 	class CraftedSpaceManager : MonoBehaviour { //MonoBehaviour required for coroutine
 		private string endpoint = "http://api.appcrafted.com/v0/assets/";
 		private string accessKey;
 		private string secretKey;
-
 		public Dictionary<string, Container> containers = new Dictionary<string, Container>();
 		public delegate	void AssetDelegate(Asset asset);
 		public static event AssetDelegate OnLoaded;
@@ -64,14 +62,10 @@ namespace CraftedInc.AppCrafted
 		//Retrieves the specified Asset.
 		public void GetAsset(string containerID, string assetID){
 			try {
-				Container container = this.containers[containerID];
-				Asset asset = container.assets[assetID];
-//				if (container != null && asset != null){
 					//trigger event OnLoaded
 					if (OnLoaded != null) {
-						OnLoaded(asset);
+						OnLoaded(this.containers[containerID].assets[assetID]);
 					}
-//				}
 			}
 			catch (KeyNotFoundException e){
 				StartCoroutine(RetrieveAsset(containerID, assetID));
@@ -83,6 +77,10 @@ namespace CraftedInc.AppCrafted
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
 			Container container = new Container();
 			Asset asset = new Asset();
+
+			//add container
+			this.containers.Add(containerID, container);
+
 			//validate credentials
 			if (this.accessKey == null || this.secretKey == null) {
 				throw new System.MemberAccessException("missing credentials");
@@ -95,55 +93,53 @@ namespace CraftedInc.AppCrafted
 			WWW www = new WWW(url, null, headers);
 			yield return www;
 
-			JSONObject JSONObject = JSONObject.Parse(www.text); 
+			JSONObject containerJSON = JSONObject.Parse(www.text); 
 
 			//process JSON here:
-			Debug.Log ("JSON OBJ: " + JSONObject.GetArray("Assets").ToString());
-			for (int i = 0; i < JSONObject.GetArray("Assets").Length; i++){
-				JSONObject newAsset = JSONObject.Parse(JSONObject.GetArray("Assets")[i].ToString());
-				Debug.Log ("newAsset: " + newAsset);
-				string userID = newAsset.GetString("UserID");
-				asset.attributes.Add("UserID", userID);
+			//adding assets
+			for (int i = 0; i < containerJSON.GetArray("Assets").Length; i++){
 
+				JSONObject assetJSON = JSONObject.Parse(containerJSON.GetArray("Assets")[i].ToString());
+
+				string currentAssetID = assetJSON.GetString("AssetID");
+				this.containers[containerID].assets.Add(currentAssetID, asset);
+				Debug.Log ("AssetID: " + currentAssetID);
+
+				//adding attributes
+				foreach (var keyValuePair in assetJSON.values) {
+//					Debug.Log ("Key: " + keyValuePair.Key + "\nValue: " + keyValuePair.Value);
+					if (keyValuePair.Value.Type == JSONValueType.Object){
+
+						string attributeName = keyValuePair.Key;
+
+						JSONObject attributeJSON = JSONObject.Parse(keyValuePair.Value.ToString());
+//						Debug.Log ("attributeJSON: " + attributeJSON);
+//						Debug.Log ("attributeJSON Type: " + attributeJSON.GetString("Type"));
+//						Debug.Log ("attributeJSON Value: " + attributeJSON.GetString("Value"));
+
+						this.containers[containerID]
+							.assets[currentAssetID]
+							.attributes.Add(attributeName, attributeJSON.GetString ("Value"));
+						Debug.Log ("attributeName: " + attributeName 
+						           + "\n" 
+						           + this.containers[containerID]
+						           		 .assets[currentAssetID]
+						           		 .attributes[attributeName]);
+					}
+				}
 			}
 
-
 			//trigger event OnLoaded
-//			if (OnLoaded != null) { OnLoaded(asset); }
+			if (OnLoaded != null) {
+				Debug.Log ("containerID: " + containerID
+				           + "\n" + this.containers[containerID]);
+				Debug.Log ("assetID: " + assetID
+				           + "\n" + this.containers[containerID].assets[assetID]);
+				OnLoaded(this.containers[containerID].assets[assetID]); 
+			}
 		}
 
-//		// GET the JSON file from server and retrive assets from server
-//		IEnumerator GetCraftedSpace (string containerID) {
-//
-//			#region Setting Header for Authorization
-//			//header for authorization
-//			Hashtable headers = new Hashtable();
-//			headers["Authorization"] = "Basic " +
-//				System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
-//					this.accessKey + ":" + this.secretKey));
-//			#endregion
-//
-//			#region GET data from server
-//			//string endpoint = this.endpoint; 
-//			string url = this.endpoint + containerID + "/all";
-//			
-//			WWW www = new WWW(url, null, headers);	// Start a download of the given URL 
-//			yield return www;			// wait until the download is done
-//			#endregion
-//
-//			JSONObject thisJSONObject = JSONObject.Parse(www.text); //define the JSON Object
-//
-//			//initialize craftedAssets array in the craftedSpace
-//			craftedSpace.craftedAssets = new CraftedAsset[thisJSONObject.GetArray("Assets").Length];
-//
-//			for (int i = 0; i < craftedSpace.craftedAssets.Length; i++) {
-//				craftedSpace.craftedAssets[i] = new CraftedAsset();
-//			}
-//
-//			//load CraftedAssets (an array of CraftedAsset)
-//			for (int i = 0; i < craftedSpace.craftedAssets.Length; i++) {
-//				JSONObject thisAsset = JSONObject.Parse(thisJSONObject.GetArray("Assets")[i].ToString());
-//				
+
 //				//check if there's an image link
 //				if (thisAsset.GetString ("image") != null){
 //					//get the image from the image link
@@ -151,8 +147,6 @@ namespace CraftedInc.AppCrafted
 //					yield return wwwImage;
 //					craftedSpace.craftedAssets[i].image = wwwImage.texture;
 //				}
-//			}
-//		}
 
 		//unload previously loaded assets (particularly images) from memory
 		private void UnloadCraftedSpaceFromMemory(CraftedSpace craftedSpace) { //ToDo: need to re-evaluate, not generic enough 
