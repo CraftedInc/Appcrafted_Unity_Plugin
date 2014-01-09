@@ -1,7 +1,7 @@
 # Appcrafted - Unity plugin / SDK
 ## How to use this plugin? (C# example) 
 
-#### Step 1 - using AppCrafted namespace:
+#### Step 1 - using Appcrafted namespace:
 First make sure you are using the Appcrafted namespace at the top of your script (where "using UnityEngine" and "using System.Collections" usually are).
 	
 	using CraftedInc.Appcrafted;
@@ -52,4 +52,3 @@ Attributes are stored as a dictionary. Use asset.attributes[ **attribute name** 
     ninjaName = asset.attributes["name"] as string;
 
 The values of attribute are of type Object, so you have to cast to specific types when you use them. In the example above, the value of the "name" attribute is a string, so we add "as string" to the end of the dictionary. 
-    
