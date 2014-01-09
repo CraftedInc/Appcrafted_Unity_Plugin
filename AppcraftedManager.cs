@@ -1,6 +1,6 @@
 /*  AppcraftedManager.cs 
   — SDK to manager data on the Appcrafted service (http://www.appcrafted.com/)
-  version 1.0 — January 15th, 2014
+  version 1.0 — January 15, 2014
   Copyright © 2014 Crafted, Inc.
 
   This software is provided 'as-is', without any express or implied
@@ -26,7 +26,7 @@
 
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic; //for List<> and Dictionary<>
+using System.Collections.Generic;
 using Boomlagoon.JSON;
 using System;
 using System.Text;
@@ -49,7 +49,7 @@ namespace CraftedInc.Appcrafted
 		public delegate	void AssetDelegate(Asset asset);
 		public static event AssetDelegate OnLoaded;
 
-		//Create a singleton that doesn't need to be attached to a gameobject
+		//create a singleton that doesn't need to be attached to a gameobject
 		#region Create Singleton
 		private static AppcraftedManager instance = null;
 		public AppcraftedManager()
@@ -72,7 +72,6 @@ namespace CraftedInc.Appcrafted
 					GameObject go = new GameObject();
 					instance = go.AddComponent<AppcraftedManager>();
 					go.name = "AppcraftedManager";
-					
 				}
 				return instance;
 			}
@@ -85,27 +84,24 @@ namespace CraftedInc.Appcrafted
 			this.secretKey = secretKey;
 		}
 
-		//Retrieves the specified Asset.
+		//retrieves the specified Asset.
 		public void GetAsset(string containerID, string assetID){
 			try {
-					//trigger event OnLoaded
-					if (OnLoaded != null) {
-						OnLoaded(this.containers[containerID].assets[assetID]);
-					}
+				//trigger event OnLoaded
+				if (OnLoaded != null) {
+					OnLoaded(this.containers[containerID].assets[assetID]);
+				}
 			}
 			catch (KeyNotFoundException e){
 				StartCoroutine(RetrieveAsset(containerID, assetID));
 			}
-			 
 		}
 
-		//Reset container.
+		//reset container.
 		public void Reset(string containerID, string assetID){
 			containers.Clear();
-//			UnloadImages()
 			StartCoroutine(RetrieveAsset(containerID, assetID));
 		}
-
 
 		//retrive all assets in a container 
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
@@ -139,13 +135,9 @@ namespace CraftedInc.Appcrafted
 
 				//adding attributes
 				foreach (var keyValuePair in assetJSON.values) {
-//					Debug.Log ("Key: " + keyValuePair.Key + "\nValue: " + keyValuePair.Value);
 					if (keyValuePair.Value.Type == JSONValueType.Object){ //this is how we know if the pair is an attribute pair and not meta data
-
 						string attributeName = keyValuePair.Key;
-
 						JSONObject attributeJSON = JSONObject.Parse(keyValuePair.Value.ToString());
-
 						//process attributes based on Type
 						string type = attributeJSON.GetString("Type");
 						switch (type)
@@ -218,7 +210,6 @@ namespace CraftedInc.Appcrafted
 			if (OnLoaded != null) {
 				OnLoaded(this.containers[containerID].assets[assetID]); 
 			}
-
 		}
 
 	}
