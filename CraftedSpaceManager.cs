@@ -19,7 +19,8 @@ namespace CraftedInc.AppCrafted
 		private string endpoint = "http://api.appcrafted.com/v0/assets/";
 		private string accessKey;
 		private string secretKey;
-		public Dictionary<string, Container> containers = new Dictionary<string, Container>();
+		private Dictionary<string, Container> containers = new Dictionary<string, Container>();
+//		private List<Texture2D> loadedImages = new List<Texture2D>();
 		public delegate	void AssetDelegate(Asset asset);
 		public static event AssetDelegate OnLoaded;
 
@@ -73,6 +74,14 @@ namespace CraftedInc.AppCrafted
 			 
 		}
 
+		//Reset container.
+		public void Reset(string containerID, string assetID){
+			containers.Clear();
+//			UnloadImages()
+			StartCoroutine(RetrieveAsset(containerID, assetID));
+		}
+
+
 		//retrive all assets in a container 
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
 			//add container
@@ -93,10 +102,8 @@ namespace CraftedInc.AppCrafted
 
 			JSONObject containerJSON = JSONObject.Parse(www.text); 
 
-			//process JSON here:
 			//adding assets
 			for (int i = 0; i < containerJSON.GetArray("Assets").Length; i++){
-
 
 				JSONObject assetJSON = JSONObject.Parse(containerJSON.GetArray("Assets")[i].ToString());
 
@@ -126,31 +133,34 @@ namespace CraftedInc.AppCrafted
 							string value = attributeJSON.GetString ("Value");
 							this.containers[containerID].assets[currentAssetID]
 							.attributes.Add(attributeName, value);
-//							Debug.Log (attributeName + " : " 
-//							           + this.containers[containerID]
-//							           .assets[currentAssetID]
-//							           .attributes[attributeName]);
+							Debug.Log (attributeName + " : " 
+							           + this.containers[containerID]
+							           .assets[currentAssetID]
+							           .attributes[attributeName]);
 							break;
 						case "IMAGE":
 							string imageURL = attributeJSON.GetString ("Value");
 							WWW imageObject = new WWW(imageURL); 
 							yield return imageObject;
-							Texture2D image = imageObject.texture as Texture2D;
+//							Texture2D image = imageObject.texture as Texture2D;
+							Texture2D image = new Texture2D(imageObject.texture.width, imageObject.texture.height);
+							imageObject.LoadImageIntoTexture(image);
+//							loadedImages.Add(image); // adding the image to loadedImages so we can unload them later if necessary
 							this.containers[containerID].assets[currentAssetID]
 							.attributes.Add(attributeName, image);
-//							Debug.Log (attributeName + " : " 
-//							           + this.containers[containerID]
-//							           .assets[currentAssetID]
-//							           .attributes[attributeName]);
+							Debug.Log (attributeName + " : " 
+							           + this.containers[containerID]
+							           .assets[currentAssetID]
+							           .attributes[attributeName]);
 							break;
 						case "NUMBER":
 							double number = attributeJSON.GetNumber("Value");
 							this.containers[containerID].assets[currentAssetID]
 							.attributes.Add(attributeName, number);
-//							Debug.Log (attributeName + " : " 
-//							           + this.containers[containerID]
-//							           .assets[currentAssetID]
-//							           .attributes[attributeName]);
+							Debug.Log (attributeName + " : " 
+							           + this.containers[containerID]
+							           .assets[currentAssetID]
+							           .attributes[attributeName]);
 							break;
 						case "FILE":
 							object file = attributeJSON.GetObject("Value");
@@ -186,21 +196,18 @@ namespace CraftedInc.AppCrafted
 
 			//trigger event OnLoaded
 			if (OnLoaded != null) {
-//				Debug.Log ("containerID: " + containerID
-//				           + "\n" + this.containers[containerID]);
-//				Debug.Log ("assetID: " + assetID
-//				           + "\n" + this.containers[containerID].assets[assetID]);
 				OnLoaded(this.containers[containerID].assets[assetID]); 
 			}
+
 		}
 
-		//unload previously loaded assets (particularly images) from memory
-		private void UnloadCraftedSpaceFromMemory(CraftedSpace craftedSpace) { //ToDo: need to re-evaluate, not generic enough 
-			for (int i = 0; i < craftedSpace.craftedAssets.Length; i++) {
-				Destroy(craftedSpace.craftedAssets[i].image);	//removes the image texture from memory
-			}
-			
-		}
+		//unload previously loaded images from memory
+//		private void UnloadImages() { 
+//			for (int i = 0; i < loadedImages.Count; i++) {
+//				Destroy(loadedImages[i]);	//removes the image texture from memory
+//			}
+//			loadedImages.Clear();
+//		}
 	}
 
 }
