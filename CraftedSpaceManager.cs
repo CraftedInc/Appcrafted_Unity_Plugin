@@ -75,10 +75,8 @@ namespace CraftedInc.AppCrafted
 
 		//a coroutine that retrives all assets in a container 
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
-			Container container = new Container();
-			Asset asset = new Asset();
-
 			//add container
+			Container container = new Container();
 			this.containers.Add(containerID, container);
 
 			//validate credentials
@@ -99,8 +97,10 @@ namespace CraftedInc.AppCrafted
 			//adding assets
 			for (int i = 0; i < containerJSON.GetArray("Assets").Length; i++){
 
+
 				JSONObject assetJSON = JSONObject.Parse(containerJSON.GetArray("Assets")[i].ToString());
 
+				Asset asset = new Asset();
 				string currentAssetID = assetJSON.GetString("AssetID");
 				this.containers[containerID].assets.Add(currentAssetID, asset);
 				Debug.Log ("AssetID: " + currentAssetID);
