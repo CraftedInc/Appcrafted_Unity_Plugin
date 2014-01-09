@@ -73,7 +73,7 @@ namespace CraftedInc.AppCrafted
 			 
 		}
 
-		//a coroutine that retrives all assets in a container 
+		//retrive all assets in a container 
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
 			//add container
 			Container container = new Container();
@@ -103,12 +103,12 @@ namespace CraftedInc.AppCrafted
 				Asset asset = new Asset();
 				string currentAssetID = assetJSON.GetString("AssetID");
 				this.containers[containerID].assets.Add(currentAssetID, asset);
-				Debug.Log ("AssetID: " + currentAssetID);
+				Debug.Log ("--- New asset: " + currentAssetID + " ---");
 
 				//adding attributes
 				foreach (var keyValuePair in assetJSON.values) {
 //					Debug.Log ("Key: " + keyValuePair.Key + "\nValue: " + keyValuePair.Value);
-					if (keyValuePair.Value.Type == JSONValueType.Object){
+					if (keyValuePair.Value.Type == JSONValueType.Object){ //this is how we know if the pair is an attribute pair and not meta data
 
 						string attributeName = keyValuePair.Key;
 
@@ -117,36 +117,82 @@ namespace CraftedInc.AppCrafted
 //						Debug.Log ("attributeJSON Type: " + attributeJSON.GetString("Type"));
 //						Debug.Log ("attributeJSON Value: " + attributeJSON.GetString("Value"));
 
-						this.containers[containerID]
-							.assets[currentAssetID]
-							.attributes.Add(attributeName, attributeJSON.GetString ("Value"));
-						Debug.Log ("attributeName: " + attributeName 
-						           + "\n" 
-						           + this.containers[containerID]
-						           		 .assets[currentAssetID]
-						           		 .attributes[attributeName]);
+						//process attributes based on Type
+						string type = attributeJSON.GetString("Type");
+						switch (type)
+						{
+						case "URL":
+						case "STRING":
+							string value = attributeJSON.GetString ("Value");
+							this.containers[containerID].assets[currentAssetID]
+							.attributes.Add(attributeName, value);
+//							Debug.Log (attributeName + " : " 
+//							           + this.containers[containerID]
+//							           .assets[currentAssetID]
+//							           .attributes[attributeName]);
+							break;
+						case "IMAGE":
+							string imageURL = attributeJSON.GetString ("Value");
+							WWW imageObject = new WWW(imageURL); 
+							yield return imageObject;
+							Texture2D image = imageObject.texture as Texture2D;
+							this.containers[containerID].assets[currentAssetID]
+							.attributes.Add(attributeName, image);
+//							Debug.Log (attributeName + " : " 
+//							           + this.containers[containerID]
+//							           .assets[currentAssetID]
+//							           .attributes[attributeName]);
+							break;
+						case "NUMBER":
+							double number = attributeJSON.GetNumber("Value");
+							this.containers[containerID].assets[currentAssetID]
+							.attributes.Add(attributeName, number);
+//							Debug.Log (attributeName + " : " 
+//							           + this.containers[containerID]
+//							           .assets[currentAssetID]
+//							           .attributes[attributeName]);
+							break;
+						case "FILE":
+							object file = attributeJSON.GetObject("Value");
+							this.containers[containerID].assets[currentAssetID]
+							.attributes.Add(attributeName, file);
+							Debug.Log (attributeName + " : " 
+							           + this.containers[containerID]
+							           .assets[currentAssetID]
+							           .attributes[attributeName]);
+							break;
+						case "NUMBER_ARRAY":
+							int numberArrayLength = attributeJSON.GetArray("Value").Length;
+							double[] number_array = new double[numberArrayLength];
+							for (int j = 0; j<numberArrayLength ;j++){
+								number_array[j] = attributeJSON.GetArray("Value")[j].Number ;
+							}
+							this.containers[containerID].assets[currentAssetID]
+							.attributes.Add(attributeName, number_array);
+							break;
+						case "STRING_ARRAY":
+							int stringArrayLength = attributeJSON.GetArray("Value").Length;
+							string[] string_array = new string[stringArrayLength];
+							for (int k = 0; k<stringArrayLength ;k++){
+								string_array[k] = attributeJSON.GetArray("Value")[k].Str ;
+							}
+							this.containers[containerID].assets[currentAssetID]
+							.attributes.Add(attributeName, string_array);
+							break;
+						}
 					}
 				}
 			}
 
 			//trigger event OnLoaded
 			if (OnLoaded != null) {
-				Debug.Log ("containerID: " + containerID
-				           + "\n" + this.containers[containerID]);
-				Debug.Log ("assetID: " + assetID
-				           + "\n" + this.containers[containerID].assets[assetID]);
+//				Debug.Log ("containerID: " + containerID
+//				           + "\n" + this.containers[containerID]);
+//				Debug.Log ("assetID: " + assetID
+//				           + "\n" + this.containers[containerID].assets[assetID]);
 				OnLoaded(this.containers[containerID].assets[assetID]); 
 			}
 		}
-
-
-//				//check if there's an image link
-//				if (thisAsset.GetString ("image") != null){
-//					//get the image from the image link
-//					WWW wwwImage = new WWW(thisAsset.GetString ("image")); // "image" contains a link (string) to the image
-//					yield return wwwImage;
-//					craftedSpace.craftedAssets[i].image = wwwImage.texture;
-//				}
 
 		//unload previously loaded assets (particularly images) from memory
 		private void UnloadCraftedSpaceFromMemory(CraftedSpace craftedSpace) { //ToDo: need to re-evaluate, not generic enough 
