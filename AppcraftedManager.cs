@@ -46,6 +46,7 @@ namespace CraftedInc.Appcrafted
 		private string accessKey;
 		private string secretKey;
 		private Dictionary<string, Container> containers = new Dictionary<string, Container>();
+		private bool isResetting = false;
 		public delegate	void AssetDelegate(Asset asset);
 		public static event AssetDelegate OnLoaded;
 
@@ -99,12 +100,17 @@ namespace CraftedInc.Appcrafted
 
 		//reset container.
 		public void Reset(string containerID, string assetID){
-			containers.Clear();
-			StartCoroutine(RetrieveAsset(containerID, assetID));
+			if (!isResetting){
+				containers.Clear();
+				StartCoroutine(RetrieveAsset(containerID, assetID));
+			}
 		}
 
 		//retrive all assets in a container 
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
+
+			isResetting = true;
+
 			//add container
 			Container container = new Container();
 			this.containers.Add(containerID, container);
@@ -210,6 +216,8 @@ namespace CraftedInc.Appcrafted
 			if (OnLoaded != null) {
 				OnLoaded(this.containers[containerID].assets[assetID]); 
 			}
+
+			isResetting = false;
 		}
 
 	}

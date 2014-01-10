@@ -55,3 +55,9 @@ Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/
     ninjaName = asset.attributes["name"] as string;
 
 The values of attribute are of type Object, so you have to cast to specific types when you use them. In the example above, the value of the "name" attribute is a string, so we add "as string" to the end of the dictionary. 
+
+as string
+as double
+as Texture2D
+as string[]
+as double[]
