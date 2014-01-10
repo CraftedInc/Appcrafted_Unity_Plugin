@@ -94,12 +94,14 @@ namespace CraftedInc.Appcrafted
 				}
 			}
 			catch (KeyNotFoundException e){
-				StartCoroutine(RetrieveAsset(containerID, assetID));
+				if (!isResetting){
+					StartCoroutine(RetrieveAsset(containerID, assetID));
+				}
 			}
 		}
 
 		//reset container.
-		public void Reset(string containerID, string assetID){
+		public void ClearAssetCache(string containerID, string assetID){
 			if (!isResetting){
 				containers.Clear();
 				StartCoroutine(RetrieveAsset(containerID, assetID));
