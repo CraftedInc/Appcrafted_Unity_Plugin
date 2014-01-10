@@ -12,14 +12,18 @@ Before you can retrieve assets, you need to register your credentials first.
 Use _AppcraftedManager.Instance.RegisterCredentials( **Your Access Key**, **Your Secret Key**)_
 
 For example:
-    AppcraftedManager.Instance.RegisterCredentials("Zfasdf4syQacVGyUK4aSA", "mAavs24KUpe48Gqps");
+
+    AppcraftedManager.Instance
+    .RegisterCredentials("Zfasdf4syQacVGyUK4aSA", "mAavs24KUpe48Gqps");
 
 You should be able to find your keys on [Appcrafted](https://developer.appcrafted.com) under [Account>Appcrafted Credentials](https://developer.appcrafted.com/#/account). 
 
 After your credentials have been registered, you can use GetAsset method to get your assets.
 
 _AppcraftedManager.Instance.GetAsset( **container ID**, **asset ID**);_
-    AppcraftedManager.Instance.GetAsset("U3y4S2HD23HnNwWb60ip", "ninja");
+
+        AppcraftedManager.Instance
+    .GetAsset("U3y4S2HD23HnNwWb60ip", "ninja");
 
 You can have both _RegisterCredentials()_ and _GetAsset()_ in a _Start()_ when your game/app first launches to start the downloading early.
 
