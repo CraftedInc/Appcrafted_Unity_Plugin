@@ -21,7 +21,7 @@ After your credentials have been registered, you can use GetAsset method to get 
 
 _AppcraftedManager.Instance.GetAsset( **container ID**, **asset ID**);_
 
-        AppcraftedManager.Instance.GetAsset("U3y4S2HD23HnNwWb60ip", "ninja");
+    AppcraftedManager.Instance.GetAsset("U3y4S2HD23HnNwWb60ip", "ninja");
 
 You can have both _RegisterCredentials()_ and _GetAsset()_ in a _Start()_ when your game/app first launches to start the downloading early.
 
@@ -32,7 +32,7 @@ Add a delegation to your script.
 	#region AppcraftedManager Delegation
 	void OnEnable()
 	{
-		AppcraftedManager.OnLoaded += SomeMethod; //replace SomeMethod with your own method name to be used consistently in the delegation
+		AppcraftedManager.OnLoaded += SomeMethod; //replace SomeMethod with your own method name
 	}
 	void OnDisable()
 	{
@@ -40,9 +40,9 @@ Add a delegation to your script.
 	}
 	void SomeMethod(Asset asset){
 		//code to be executed when assets are downloaded
-    //for example
-    this.asset = asset;
-    ninjaName = asset.attributes["name"] as string;
+        //for example
+        this.asset = asset;
+        ninjaName = asset.attributes["name"] as string;
 	}
 	#endregion
 
@@ -50,7 +50,7 @@ SomeMethod() will subscribe to the OnLoaded event and gets called when the deliv
 
 _Note: make sure the method name "SomeMethod" is the same as the ones in OnEnable() and OnDisable(). In OnEnable() we subscribe SomeMethod() to the OnLoaded event, and **in OnDisable() we unsubscribe SomeMethod() from the OnLoaded event so that we don't keep it in the memory**._
 
-- Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/xfhwa508). Use asset.attributes[ **attribute name** ] to find the value of an attribute. Example:
+Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/xfhwa508). Use asset.attributes[ **attribute name** ] to find the value of an attribute. Example:
 
     ninjaName = asset.attributes["name"] as string;
 
