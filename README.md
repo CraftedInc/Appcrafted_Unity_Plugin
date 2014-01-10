@@ -13,21 +13,19 @@ Use _AppcraftedManager.Instance.RegisterCredentials( **Your Access Key**, **Your
 
 For example:
 
-    AppcraftedManager.Instance
-    .RegisterCredentials("Zfasdf4syQacVGyUK4aSA", "mAavs24KUpe48Gqps");
+    AppcraftedManager.Instance.RegisterCredentials("Zfasdf4syQacVGyUK4aSA", "mAavs24KUpe48Gqps");
 
-You should be able to find your keys on [Appcrafted](https://developer.appcrafted.com) under [Account>Appcrafted Credentials](https://developer.appcrafted.com/#/account). 
+You should be able to find your keys on [Appcrafted](https://developer.appcrafted.com) under [Account > Appcrafted Credentials](https://developer.appcrafted.com/#/account). 
 
 After your credentials have been registered, you can use GetAsset method to get your assets.
 
 _AppcraftedManager.Instance.GetAsset( **container ID**, **asset ID**);_
 
-        AppcraftedManager.Instance
-    .GetAsset("U3y4S2HD23HnNwWb60ip", "ninja");
+        AppcraftedManager.Instance.GetAsset("U3y4S2HD23HnNwWb60ip", "ninja");
 
 You can have both _RegisterCredentials()_ and _GetAsset()_ in a _Start()_ when your game/app first launches to start the downloading early.
 
-#### Step 3 - Create a delegation and using your assets
+#### Step 3 - Create a delegation to use your assets
 
 Add a delegation to your script. 
 
@@ -52,7 +50,8 @@ SomeMethod() will subscribe to the OnLoaded event and gets called when the deliv
 
 _Note: make sure the method name "SomeMethod" is the same as the ones in OnEnable() and OnDisable(). In OnEnable() we subscribe SomeMethod() to the OnLoaded event, and **in OnDisable() we unsubscribe SomeMethod() from the OnLoaded event so that we don't keep it in the memory**._
 
-Attributes are stored as a dictionary. Use asset.attributes[ **attribute name** ] to find the value of an attribute. Example:
+- Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/xfhwa508). Use asset.attributes[ **attribute name** ] to find the value of an attribute. Example:
+
     ninjaName = asset.attributes["name"] as string;
 
 The values of attribute are of type Object, so you have to cast to specific types when you use them. In the example above, the value of the "name" attribute is a string, so we add "as string" to the end of the dictionary. 
