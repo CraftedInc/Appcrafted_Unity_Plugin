@@ -3,6 +3,9 @@ for [Appcrafted](http://appcrafted.com/)
 
 ## How to use this plugin? (C# example) 
 
+#### Step 0 - extract the files
+Extract the files into a new folder inside your /Assets folder in your Unity project. To keep things clean, we suggest naming this folder **Appcrafted**. 
+
 #### Step 1 - using Appcrafted namespace:
 First make sure you are using the Appcrafted namespace at the top of your script (where "using UnityEngine" and "using System.Collections" usually are).
 	
