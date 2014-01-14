@@ -1,4 +1,6 @@
 # Appcrafted - Unity plugin / SDK
+for [Appcrafted](http://appcrafted.com/)
+
 ## How to use this plugin? (C# example) 
 
 #### Step 1 - using Appcrafted namespace:
@@ -59,6 +61,15 @@ The values of attribute are of type **object**, so you have to cast to specific 
 as string
 as double
 as Texture2D
-as AssetBundle
 as string[]
 as double[]
+
+#### Return types
+**URL** and **STRING** attribute types will return a **string**.
+**FILE** return a **string** containing a URL to the file on the CDN (content delivery network). 
+**NUMBER** returns a **double**.
+**IMAGE** returns a **Texture2D**.
+**ARRAY(S)** returns a string array **string[]**.
+**ARRAY(N)** returns a double array **double[]**.
+
+

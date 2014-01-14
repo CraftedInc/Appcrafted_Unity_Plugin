@@ -1,6 +1,6 @@
 /*  AppcraftedManager.cs 
   — SDK to manager data on the Appcrafted service (http://www.appcrafted.com/)
-  version 1.0 — January 15, 2014
+  version 0.1 — January 14, 2014
   Copyright © 2014 Crafted, Inc.
 
   This software is provided 'as-is', without any express or implied
