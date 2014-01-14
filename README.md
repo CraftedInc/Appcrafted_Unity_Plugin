@@ -9,7 +9,7 @@ First make sure you are using the Appcrafted namespace at the top of your script
 	using CraftedInc.Appcrafted;
 
 #### Step 2 - register your credentials and get your asset:
-Before you can retrieve assets, you need to register your credentials first. 
+Before you retrieve assets, you need to register your credentials. 
 
 Use _AppcraftedManager.Instance.RegisterCredentials( **Your Access Key**, **Your Secret Key**)_
 
@@ -50,7 +50,7 @@ Subscribe to the OnLoaded event, this allows SomeMethod() to be run when the ass
 
 SomeMethod() will subscribe to the OnLoaded event and gets called when the delivery of your assets via the network is finished. Add your code here to process assets when the app finishes downloading them. 
 
-_Note: make sure the method name "SomeMethod" is the same as the ones in OnEnable() and OnDisable(). In OnEnable() we subscribe SomeMethod() to the OnLoaded event, and **in OnDisable() we unsubscribe SomeMethod() from the OnLoaded event so that we don't keep it in the memory**._
+_Note: make sure the method name "SomeMethod" is the same as the ones in OnEnable() and OnDisable(). In OnEnable() we subscribe SomeMethod() to the OnLoaded event, and **in OnDisable() we unsubscribe SomeMethod() from the OnLoaded event to avoid a memory leak**._
 
 Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/xfhwa508). Use asset.attributes[ **attribute name** ] to find the value of an attribute. Example:
 
@@ -58,18 +58,33 @@ Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/
 
 The values of attribute are of type **object**, so you have to cast to specific types when you use them. In the example above, the value of the "name" attribute is a string, so we add "as string" to the end of the dictionary. 
 
-as string
-as double
-as Texture2D
-as string[]
-as double[]
+For example:
 
-#### Return types
-**URL** and **STRING** attribute types will return a **string**.
-**FILE** return a **string** containing a URL to the file on the CDN (content delivery network). 
-**NUMBER** returns a **double**.
-**IMAGE** returns a **Texture2D**.
-**ARRAY(S)** returns a string array **string[]**.
-**ARRAY(N)** returns a double array **double[]**.
+    ninjaName = asset.attributes["name"] as string;
+    ninjaCrossPromoLink = asset.attributes["link"] as string;
+    ninjaHP = asset.attributes["hp"] as double;
+    ninjaFace = asset.attributes["face"] as Texture2D;
+    ninjaAliases = asset.attributes["aliases"] as string[];
+    ninjaTopScores = asset.attributes["topscores"] as double[];
+
+If the attribute is a file (for example, a .unity3d asset bundle), it's a URL and should be cast as a string. You need to retrieve and load the file in your script. 
+
+    ninjaAssetBundle = asset.attributes["assetBundle"] as string;
+
+
+#### Attribute types
+
+**URL** and **STRING** attributes are `string`.
+
+**FILE** attributes are `string` containing URLs to the files on the CDN (content delivery network). 
+
+**NUMBER** attributes are `double`.
+
+**IMAGE** attributes are `Texture2D`.
+
+**ARRAY(S)** attributes are `string[]`.
+
+**ARRAY(N)** attributes are `double[]`.
+
 
 
