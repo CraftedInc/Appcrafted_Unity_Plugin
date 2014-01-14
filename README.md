@@ -25,11 +25,11 @@ _AppcraftedManager.Instance.GetAsset( **container ID**, **asset ID**);_
 
 You can have both _RegisterCredentials()_ and _GetAsset()_ in a _Start()_ when your game/app first launches to start the downloading early.
 
-#### Step 3 - Create a delegation to use your assets
+#### Step 3 - Subscribe to the OnLoaded event to use your assets when download finishes. 
 
-Add a delegation to your script. 
+Subscribe to the OnLoaded event, this allows SomeMethod() to be run when the assets are downloaded. 
 
-	#region AppcraftedManager Delegation
+	#region AppcraftedManager Delegate
 	void OnEnable()
 	{
 		AppcraftedManager.OnLoaded += SomeMethod; //replace SomeMethod with your own method name
@@ -54,10 +54,11 @@ Attributes are stored as [Dictionaries](http://msdn.microsoft.com/en-us/library/
 
     ninjaName = asset.attributes["name"] as string;
 
-The values of attribute are of type Object, so you have to cast to specific types when you use them. In the example above, the value of the "name" attribute is a string, so we add "as string" to the end of the dictionary. 
+The values of attribute are of type **object**, so you have to cast to specific types when you use them. In the example above, the value of the "name" attribute is a string, so we add "as string" to the end of the dictionary. 
 
 as string
 as double
 as Texture2D
+as AssetBundle
 as string[]
 as double[]
