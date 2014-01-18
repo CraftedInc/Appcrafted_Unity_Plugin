@@ -45,6 +45,7 @@ namespace CraftedInc.Appcrafted
 		private string secretKey;
 		private Dictionary<string, Container> containers = new Dictionary<string, Container>();
 		private bool isResetting = false;
+		public float requestTimeout = 30f;
 		public delegate	void AssetDelegate(Asset asset);
 		public static event AssetDelegate OnLoaded;
 		
@@ -108,11 +109,12 @@ namespace CraftedInc.Appcrafted
 		
 		//retrive all assets in a container 
 		private IEnumerator RetrieveAsset(string containerID, string assetID) {
-			
+
+			string url = this.endpoint + containerID + "/all";
+
 			isResetting = true;
 
 			JSONObject containerJSON = new JSONObject();
-			string url = this.endpoint + containerID + "/all";
 
 			//add container
 			if (!this.containers.ContainsKey(containerID)){
@@ -126,15 +128,20 @@ namespace CraftedInc.Appcrafted
 			}
 #if UNITY_IPHONE
 
+			float timeOut = Time.time + requestTimeout;
 			var request = new HTTP.Request("GET", url);
 			request.SetHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(this.accessKey + ":" + this.secretKey)));
 			request.Send();
-			while(!request.isDone)
+			while(!request.isDone && Time.time <= timeOut)
 			{
 				yield return new WaitForEndOfFrame();
 			}
-			if (request.exception!=null){
+			if (!request.isDone){ //if request is not done before timeout
+				yield break;
+			}
+			if (request.exception!=null){ // check internet connection
 				Debug.Log(request.exception);
+				yield break;
 			} else {
 				var response = request.response;
 				//inspect response code
@@ -148,6 +155,7 @@ namespace CraftedInc.Appcrafted
 
 				containerJSON = JSONObject.Parse(response.Text); 
 			}
+			
 
 
 #else
@@ -158,10 +166,14 @@ namespace CraftedInc.Appcrafted
 					this.accessKey + ":" + this.secretKey));
 			WWW www = new WWW(url, null, headers);
 			yield return www;
+			if (!String.IsNullOrEmpty(www.error)) { //check internet connection
+				yield break;
+			}
 			containerJSON = JSONObject.Parse(www.text);
 
 #endif			 
-			
+
+
 			//adding assets
 			for (int i = 0; i < containerJSON.GetArray("Assets").Length; i++){
 				
