@@ -126,39 +126,39 @@ namespace CraftedInc.Appcrafted
 			if (this.accessKey == null || this.secretKey == null) {
 				throw new System.MemberAccessException("missing credentials");
 			}
-#if UNITY_IPHONE
-
-			float timeOut = Time.time + requestTimeout;
-			var request = new HTTP.Request("GET", url);
-			request.SetHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(this.accessKey + ":" + this.secretKey)));
-			request.Send();
-			while(!request.isDone && Time.time <= timeOut)
-			{
-				yield return new WaitForEndOfFrame();
-			}
-			if (!request.isDone){ //if request is not done before timeout
-				yield break;
-			}
-			if (request.exception!=null){ // check internet connection
-				Debug.Log(request.exception);
-				yield break;
-			} else {
-				var response = request.response;
-				//inspect response code
-				Debug.Log(response.status);
-				//inspect headers
-				Debug.Log(response.GetHeader("Content-Type"));
-				//Get the body as a byte array
-				//Debug.Log(response.bytes);
-				//Or as a string
-				Debug.Log(response.Text);
-
-				containerJSON = JSONObject.Parse(response.Text); 
-			}
-			
-
-
-#else
+//#if UNITY_IPHONE
+//
+//			float timeOut = Time.time + requestTimeout;
+//			var request = new HTTP.Request("GET", url);
+//			request.SetHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(this.accessKey + ":" + this.secretKey)));
+//			request.Send();
+//			while(!request.isDone && Time.time <= timeOut)
+//			{
+//				yield return new WaitForEndOfFrame();
+//			}
+//			if (!request.isDone){ //if request is not done before timeout
+//				yield break;
+//			}
+//			if (request.exception!=null){ // check internet connection
+//				Debug.Log(request.exception);
+//				yield break;
+//			} else {
+//				var response = request.response;
+//				//inspect response code
+//				Debug.Log(response.status);
+//				//inspect headers
+//				Debug.Log(response.GetHeader("Content-Type"));
+//				//Get the body as a byte array
+//				//Debug.Log(response.bytes);
+//				//Or as a string
+//				Debug.Log(response.Text);
+//
+//				containerJSON = JSONObject.Parse(response.Text); 
+//			}
+//			
+//
+//
+//#else
 
 			Hashtable headers = new Hashtable();
 			headers["Authorization"] = "Basic " +
@@ -171,7 +171,7 @@ namespace CraftedInc.Appcrafted
 			}
 			containerJSON = JSONObject.Parse(www.text);
 
-#endif			 
+//#endif			 
 
 
 			//adding assets
